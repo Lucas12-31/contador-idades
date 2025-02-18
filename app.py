@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS  # Permite requisições do frontend
+import os
 
 app = Flask(__name__)
 CORS(app)  # Habilita CORS para evitar erros de bloqueio no navegador
@@ -53,4 +54,5 @@ def contar_idades():
     return jsonify(resultado)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Usa a porta definida pela Render
+app.run(host="0.0.0.0", port=port, debug=True)
