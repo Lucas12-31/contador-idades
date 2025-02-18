@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador de Faixas Etárias</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        table {
+            width: 50%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+        .total {
+            font-weight: bold;
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Insira as idades separadas por vírgula</h2>
+    <input type="text" id="inputIdades" placeholder="Ex: 18,22,35,45,60">
+    <button onclick="enviarIdades()">Contar</button>
+
+    <h3>Resultado:</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Faixa Etária</th>
+                <th>Quantidade</th>
+            </tr>
+        </thead>
+        <tbody id="tabelaResultado"></tbody>
+    </table>
+
+    <script>
+        async function enviarIdades() {
+            let input = document.getElementById("inputIdades").value;
+            let idades = input.split(",").map(i => parseInt(i.trim())).filter(i => !isNaN(i));
+
+            if (idades.length === 0) {
+                alert("Por favor, insira pelo menos uma idade válida!");
+                return;
+            }
+
+            try {
+                let resposta = await fetch("http://127.0.0.1:5000/contar-idades", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ idades: idades })
+                });
+
+                if (!resposta.ok) {
+                    throw new Error("Erro ao conectar ao servidor.");
+                }
+
+                let dados = await resposta.json();
+                atualizarTabela(dados);
+
+            } catch (erro) {
+                console.error("Erro:", erro);
+                alert("Falha ao conectar ao servidor. Verifique se o backend está rodando.");
+            }
+        }
+
+        function atualizarTabela(dados) {
+            let tabela = document.getElementById("tabelaResultado");
+            tabela.innerHTML = "";
+
+            for (let faixa in dados) {
+                let classe = faixa === "Quantidade de Vidas" ? "class='total'" : "";
+                let linha = `<tr ${classe}><td>${faixa}</td><td>${dados[faixa]}</td></tr>`;
+                tabela.innerHTML += linha;
+            }
+        }
+    </script>
+
+</body>
+</html>
